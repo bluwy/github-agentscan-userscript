@@ -33,7 +33,7 @@ export const handler: RouteHandler = async (request, env, ctx) => {
   }
 
   const result = await fetch(`https://agentscan.tools/api/identify-replicant/${username}`, {
-    // headers: userAgentHeader,
+    headers: userAgentHeader,
   })
   const data: any = await result.json()
 
