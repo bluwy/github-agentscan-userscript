@@ -1,6 +1,6 @@
 # GitHub AgentScan Userscript
 
-Show AgentScan info for GitHub users.
+Show AgentScan info for GitHub users. [Install on Greasyfork](https://greasyfork.org/en/scripts/592445-github-agentscan).
 
 - Displays an "AI" label for detected users
 - Adds a "Report to AgentScan" button to report users
