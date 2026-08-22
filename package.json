@@ -1,0 +1,37 @@
+{
+  "name": "github-agentscan-userscript",
+  "private": true,
+  "version": "0.1.0",
+  "author": "Bjorn Lu",
+  "license": "MIT",
+  "description": "Show AgentScan info for GitHub users",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bluwy/github-agentscan-userscript.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bluwy/github-agentscan-userscript/issues"
+  },
+  "scripts": {
+    "dev": "node ./scripts/cli.ts dev",
+    "build": "node ./scripts/cli.ts build",
+    "worker:dev": "wrangler dev",
+    "worker:deploy": "wrangler deploy",
+    "worker:typegen": "wrangler types worker/worker-configuration.d.ts",
+    "typecheck": "tsc -b",
+    "format": "oxfmt --write \"**/*.ts\""
+  },
+  "packageManager": "pnpm@11.22.0",
+  "dependencies": {
+    "flru": "^1.0.2"
+  },
+  "devDependencies": {
+    "@bluwy/usb": "^0.2.0",
+    "@types/greasemonkey": "^4.0.7",
+    "@types/node": "^26.2.0",
+    "oxfmt": "^0.64.0",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.125.0"
+  }
+}

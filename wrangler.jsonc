@@ -1,0 +1,16 @@
+{
+  // https://developers.cloudflare.com/workers/wrangler/configuration/
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "github-agentscan-userscript",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-08-21",
+  "observability": {
+    "enabled": true,
+  },
+  "kv_namespaces": [
+    {
+      "binding": "GITHUB_AGENTSCAN_IDENTIFY",
+      "id": "818859ec60b64be49388ca250a560368",
+    },
+  ],
+}
