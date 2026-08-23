@@ -5,7 +5,7 @@ Show AgentScan info for GitHub users. [Install on Greasyfork](https://greasyfork
 - Displays an "AI" label for detected users
 - Adds a "Report to AgentScan" button to report users
 
-![example](https://github.com/user-attachments/assets/290af2dc-7b2f-4962-aea4-80a69e92e6d1)
+<img height="300" alt="example" src="https://github.com/user-attachments/assets/50fb121e-31ea-4df5-bdc3-3d1617f1ca51" />
 
 ## Sponsors
 
