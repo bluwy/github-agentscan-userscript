@@ -20,13 +20,14 @@ export const handler: RouteHandler = async (request, env, ctx) => {
 
   const username = match[1]
 
-  const cachedIdentifyResultJson = await env.GITHUB_AGENTSCAN_IDENTIFY.get(username)
-  if (cachedIdentifyResultJson) {
-    return new Response(cachedIdentifyResultJson, {
+  const cached = await env.GITHUB_AGENTSCAN_IDENTIFY.get(username)
+  if (cached) {
+    const cacheTtl = getCacheTtl(JSON.parse(cached))
+    return new Response(cached, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=31557600, immutable',
+        'Cache-Control': `public, max-age=${cacheTtl}`,
         'Access-Control-Allow-Origin': '*',
       },
     })
@@ -48,14 +49,13 @@ export const handler: RouteHandler = async (request, env, ctx) => {
     })
   }
 
-  const flagged = await isCommunityFlagged(username)
-  const cacheTtl = getCacheTtlByClassification(data.analysis.classification, flagged)
   const identifyResult: IdentifyResult = {
     score: data.analysis.score,
     classification: data.analysis.classification,
     confidence: data.analysis.confidence,
-    isCommunityFlagged: flagged,
+    isCommunityFlagged: await isCommunityFlagged(username),
   }
+  const cacheTtl = getCacheTtl(identifyResult)
   const identifyResultJson = JSON.stringify(identifyResult)
 
   ctx.waitUntil(
@@ -77,7 +77,7 @@ export const handler: RouteHandler = async (request, env, ctx) => {
 async function isCommunityFlagged(username: string) {
   const response = await fetch('https://agentscan.tools/api/verified-automations', {
     cf: {
-      // Cache this the same as the lowest ttl from `getCacheTtlByClassification`
+      // Cache this the same as the lowest ttl from `getCacheTtl`
       cacheTtl: 60 * 60 * 24, // 1 day
       cacheEverything: true,
     },
@@ -86,14 +86,11 @@ async function isCommunityFlagged(username: string) {
   return data.some((item) => item.username === username)
 }
 
-function getCacheTtlByClassification(
-  classification: IdentifyResult['classification'],
-  flagged: boolean,
-) {
-  if (flagged) {
+function getCacheTtl(identifyResult: IdentifyResult) {
+  if (identifyResult.isCommunityFlagged) {
     return 60 * 60 * 24 * 14 // 2 weeks
   }
-  switch (classification) {
+  switch (identifyResult.classification) {
     case 'automation':
       return 60 * 60 * 24 * 7 // 1 week
     case 'mixed':
