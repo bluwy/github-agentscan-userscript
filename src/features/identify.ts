@@ -33,6 +33,8 @@ export function identify() {
     const isAlreadyBot = Array.from(
       parent.querySelectorAll(
         [
+          // Label added by this userscript is a link label
+          'a.Label',
           // PR
           'span.Label',
           // Issue
