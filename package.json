@@ -1,7 +1,7 @@
 {
   "name": "github-agentscan-userscript",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Bjorn Lu",
   "license": "MIT",
   "description": "Show AgentScan info for GitHub users",
