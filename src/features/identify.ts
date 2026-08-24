@@ -15,6 +15,11 @@ export function identify() {
       '.opened-by > a',
       // Issue list
       'a[class*="IssueItem-module__authorCreatedLink"]',
+      // Home page
+      'a.Link[data-hovercard-type="user"][data-octo-dimensions="link_type:self"]',
+      // Commits page
+      'a[class*="AuthorAvatar-module__authorHoverableLink"]',
+      'a[class*="AuthorLink-module__authorNameLink"]',
     ].join(', '),
   )
   for (const authorEl of authorEls) {
@@ -45,6 +50,9 @@ export function identify() {
     const username = authorEl.textContent?.trim()
     if (!username) continue
 
+    // May appear in some pages that don't show the label, like commits page
+    if (username.endsWith('[bot]')) continue
+
     identifyUsername(username, authorEl).catch((err) => {
       console.error('Error fetching identify result for user', username, err)
     })
@@ -60,18 +68,30 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
   }
 
   const identifyResult = await getIdentifyResult(username)
+  const agentscanLink = `https://agentscan.tools/user/${username}`
 
   let label: HTMLSpanElement | null = null
   if (identifyResult.isCommunityFlagged) {
-    label = createLabel('AI', 'Label--danger', 'This user has been flagged as AI by the community')
+    label = createLabel(
+      'AI',
+      agentscanLink,
+      'Label--danger',
+      'This user has been flagged as AI by the community',
+    )
   } else if (identifyResult.classification === 'automation') {
     label = createLabel(
       'AI',
+      agentscanLink,
       'Label--severe',
       'This user has been flagged as automation by AgentScan',
     )
   } else if (identifyResult.classification === 'mixed') {
-    label = createLabel('AI', 'Label--warning', 'This user has been flagged as mixed by AgentScan')
+    label = createLabel(
+      'AI',
+      agentscanLink,
+      'Label--warning',
+      'This user has been flagged as mixed by AgentScan',
+    )
   } else {
     // For debugging
     // label = createLabel('Human', 'Label--secondary', 'Living and breathing')
@@ -82,14 +102,21 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
   }
 }
 
-function createLabel(text: string, labelClass: string, description: string): HTMLSpanElement {
+function createLabel(
+  text: string,
+  link: string,
+  labelClass: string,
+  description: string,
+): HTMLSpanElement {
   const label = document.createElement('span')
   label.className = 'tooltipped tooltipped-n'
   label.ariaLabel = description
   label.dataset.viewComponent = 'true'
-  const child = document.createElement('span')
+  const child = document.createElement('a')
   child.className = ['ml-1 Label', labelClass].filter(Boolean).join(' ')
   child.textContent = text
+  child.href = link
+  child.target = '_blank'
   label.appendChild(child)
   return label
 }
