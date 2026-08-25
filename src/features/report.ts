@@ -1,4 +1,5 @@
 import { getIdentifyResult } from '../identify-result.ts'
+import { getUsername } from '../utils-username.ts'
 
 const analyzedEls = new WeakSet<HTMLElement>()
 
@@ -23,7 +24,10 @@ function handlePR() {
     const header = button.closest('.timeline-comment-header, .timeline-comment-group')
     if (!header) continue
 
-    const username = header.querySelector<HTMLAnchorElement>('a.author')?.textContent?.trim()
+    const authorEl = header.querySelector<HTMLAnchorElement>('a.author')
+    if (!authorEl) continue
+
+    const username = getUsername(authorEl)
     if (!username) continue
 
     const userId = header

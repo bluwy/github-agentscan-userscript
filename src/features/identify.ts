@@ -1,4 +1,5 @@
 import { getIdentifyResult } from '../identify-result.ts'
+import { getUsername } from '../utils-username.ts'
 import { waitUntilInView } from '../utils-wait.ts'
 
 const analyzedUserElements = new WeakSet<HTMLElement>()
@@ -29,12 +30,13 @@ export function identify() {
     const parent = authorEl.parentElement
     if (!parent) continue
 
+    const alreadyLabeled = parent.querySelector('[data-github-agentscan-userscript]')
+    if (alreadyLabeled) continue
+
     // Check adjacent label if is already a bot
     const isAlreadyBot = Array.from(
       parent.querySelectorAll(
         [
-          // Label added by this userscript is a link label
-          'a.Label',
           // PR
           'span.Label',
           // Issue
@@ -49,7 +51,7 @@ export function identify() {
     })
     if (isAlreadyBot) continue
 
-    const username = authorEl.textContent?.trim()
+    const username = getUsername(authorEl)
     if (!username) continue
 
     // May appear in some pages that don't show the label, like commits page
@@ -94,9 +96,9 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
       'Label--warning',
       'This user has been flagged as mixed by AgentScan',
     )
-  } else {
+  } else if (false) {
     // For debugging
-    // label = createLabel('Human', 'Label--secondary', 'Living and breathing')
+    label = createLabel('Human', agentscanLink, 'Label--secondary', 'Living and breathing')
   }
 
   if (label) {
@@ -114,6 +116,7 @@ function createLabel(
   label.className = 'tooltipped tooltipped-n'
   label.ariaLabel = description
   label.dataset.viewComponent = 'true'
+  label.dataset.githubAgentscanUserscript = ''
   const child = document.createElement('a')
   child.className = ['ml-1 Label', labelClass].filter(Boolean).join(' ')
   child.textContent = text

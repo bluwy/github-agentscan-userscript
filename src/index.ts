@@ -7,17 +7,15 @@ declare global {
   const API_URL: string
 }
 
-run()
+const run = debounce(() => {
+  identify()
+  report()
+}, 200)
 
 // listen to github page loaded event
 document.addEventListener('pjax:end', () => run())
 document.addEventListener('turbo:render', () => run())
 
 // listen to react render changes
-const observer = new MutationObserver(debounce(run, 200))
+const observer = new MutationObserver(() => run())
 observer.observe(document.body, { childList: true, subtree: true })
-
-function run() {
-  identify()
-  report()
-}
