@@ -72,6 +72,8 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
   }
 
   const identifyResult = await getIdentifyResult(username)
+  if (!identifyResult) return
+
   const agentscanLink = `https://agentscan.tools/user/${username}`
 
   let label: HTMLSpanElement | null = null

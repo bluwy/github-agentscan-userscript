@@ -8,11 +8,11 @@ export interface IdentifyResult {
   isCommunityFlagged: boolean
 }
 
-const cache = flru<IdentifyResult | Promise<IdentifyResult>>(30)
+const cache = flru<IdentifyResult | null | Promise<IdentifyResult | null>>(30)
 
-export async function getIdentifyResult(username: string): Promise<IdentifyResult> {
+export async function getIdentifyResult(username: string): Promise<IdentifyResult | null> {
   const cached = cache.get(username)
-  if (cached) return cached
+  if (cached !== undefined) return cached
 
   const promise = fetchJson<IdentifyResult>(`${API_URL}/identify/${username}`)
   cache.set(username, promise)

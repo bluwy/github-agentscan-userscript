@@ -38,6 +38,8 @@ function handlePR() {
 
     buildReportIssueUrl(username, userId)
       .then((url) => {
+        if (!url) return
+
         const reportButton = button.cloneNode() as HTMLAnchorElement
         reportButton.href = url
         reportButton.target = '_blank'
@@ -54,8 +56,10 @@ function handlePR() {
 }
 
 // From agentscan-action
-async function buildReportIssueUrl(username: string, userId: string): Promise<string> {
+async function buildReportIssueUrl(username: string, userId: string): Promise<string | null> {
   const result = await getIdentifyResult(username)
+  if (!result) return null
+
   const reason = `AgentScan classified this account as possible "${result.classification}" (score ${result.score}/100).`
 
   const evidenceLines = [`- Flagged in: ${withoutBacklink(location.href)}`]
