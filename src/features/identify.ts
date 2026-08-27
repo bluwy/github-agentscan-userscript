@@ -101,6 +101,14 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
     label = createLabel('Human', agentscanLink, 'Label--secondary', 'Living and breathing')
   }
 
+  if (label && authorEl.parentElement) {
+    const parentStyle = getComputedStyle(authorEl.parentElement)
+    const alreadyHasMargin = parentStyle.display === 'flex' && parentStyle.gap.endsWith('px')
+    if (!alreadyHasMargin) {
+      ;(label.childNodes[0] as HTMLElement).classList.add('ml-1')
+    }
+  }
+
   if (label) {
     authorEl.insertAdjacentElement('afterend', label)
   }
@@ -118,7 +126,7 @@ function createLabel(
   label.dataset.viewComponent = 'true'
   label.dataset.githubAgentscanUserscript = ''
   const child = document.createElement('a')
-  child.className = ['ml-1 Label', labelClass].filter(Boolean).join(' ')
+  child.className = ['Label', labelClass].filter(Boolean).join(' ')
   child.textContent = text
   child.href = link
   child.target = '_blank'
