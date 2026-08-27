@@ -1,3 +1,4 @@
+import { knownBots } from '../constants.ts'
 import type { RouteHandler } from '../types.ts'
 import { userAgentHeader } from '../utils.ts'
 
@@ -19,6 +20,20 @@ export const handler: RouteHandler = async (request, env, ctx) => {
   if (!match) return
 
   const username = match[1]
+
+  // Known bots should already have a "bot" label, and there's no point in analyzing
+  // them further, so mark them as 400. The userscript shouldn't be fetching these in
+  // the first place.
+  if (knownBots.has(username)) {
+    return new Response('Known bot', {
+      status: 400,
+      headers: {
+        'Content-Type': 'text/plain',
+        'Cache-Control': 'public, max-age=86400', // Cache for 1 day
+        'Access-Control-Allow-Origin': '*',
+      },
+    })
+  }
 
   const cached = await env.GITHUB_AGENTSCAN_IDENTIFY.get(username)
   if (cached) {
@@ -43,7 +58,7 @@ export const handler: RouteHandler = async (request, env, ctx) => {
       status: 404,
       headers: {
         'Content-Type': 'text/plain',
-        'Cache-Control': 'public, max-age=60', // Cache for 1 minute
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
         'Access-Control-Allow-Origin': '*',
       },
     })
