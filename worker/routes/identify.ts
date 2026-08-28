@@ -24,7 +24,7 @@ export const handler: RouteHandler = async (request, env, ctx) => {
   // Known bots should already have a "bot" label, and there's no point in analyzing
   // them further, so mark them as 400. The userscript shouldn't be fetching these in
   // the first place.
-  if (knownBots.has(username)) {
+  if (knownBots.has(username.toLowerCase())) {
     return new Response('Known bot', {
       status: 400,
       headers: {
