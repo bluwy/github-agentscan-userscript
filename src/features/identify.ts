@@ -74,6 +74,9 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
   const identifyResult = await getIdentifyResult(username)
   if (!identifyResult) return
 
+  // The element could have been removed if the fetch took too long and the user navigated away
+  if (!authorEl.isConnected) return
+
   const agentscanLink = `https://agentscan.tools/user/${username}`
 
   let label: HTMLSpanElement | null = null

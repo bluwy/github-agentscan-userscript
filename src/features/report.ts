@@ -36,18 +36,24 @@ function handlePR() {
       ?.match(/\/u\/(\d+)\?/)?.[1]
     if (!userId) continue
 
-    buildReportIssueUrl(username, userId)
+    // Add the report button
+    const reportButton = button.cloneNode() as HTMLAnchorElement
+    reportButton.href = buildSimpleReportIssueUrl(username, userId)
+    reportButton.target = '_blank'
+    reportButton.textContent = 'Report to AgentScan'
+    reportButton.setAttribute('aria-label', 'Report to AgentScan')
+    delete reportButton.dataset.gaClick
+    delete reportButton.dataset.testSelector
+    button.insertAdjacentElement('afterend', reportButton)
+
+    // Update the report button href with a more complete link later as it may take a while,
+    // and we want to show the report button first
+    buildFullReportIssueUrl(username, userId)
       .then((url) => {
         if (!url) return
-
-        const reportButton = button.cloneNode() as HTMLAnchorElement
+        // The element could have been removed if the fetch took too long and the user navigated away
+        if (!reportButton.isConnected) return
         reportButton.href = url
-        reportButton.target = '_blank'
-        reportButton.textContent = 'Report to AgentScan'
-        reportButton.setAttribute('aria-label', 'Report to AgentScan')
-        delete reportButton.dataset.gaClick
-        delete reportButton.dataset.testSelector
-        button.insertAdjacentElement('afterend', reportButton)
       })
       .catch((err) => {
         console.error('Error building report issue URL for user', username, err)
@@ -55,14 +61,22 @@ function handlePR() {
   }
 }
 
+function buildSimpleReportIssueUrl(username: string, userId: string): string {
+  const url = new URL('https://github.com/matteogabriele/agentscan/issues/new')
+  url.searchParams.set('template', 'report-automated-account.yml')
+  url.searchParams.set('title', `[AUTOMATION] ${username}`)
+  url.searchParams.set('username', username)
+  url.searchParams.set('user-id', userId)
+
+  url.searchParams.set('evidence', `- Flagged in: ${withoutBacklink(location.href)}`)
+
+  return url.toString()
+}
+
 // From agentscan-action
-async function buildReportIssueUrl(username: string, userId: string): Promise<string | null> {
+async function buildFullReportIssueUrl(username: string, userId: string): Promise<string | null> {
   const result = await getIdentifyResult(username)
   if (!result) return null
-
-  const reason = `AgentScan classified this account as possible "${result.classification}" (score ${result.score}/100).`
-
-  const evidenceLines = [`- Flagged in: ${withoutBacklink(location.href)}`]
 
   const url = new URL('https://github.com/matteogabriele/agentscan/issues/new')
   url.searchParams.set('template', 'report-automated-account.yml')
@@ -70,8 +84,11 @@ async function buildReportIssueUrl(username: string, userId: string): Promise<st
   url.searchParams.set('username', username)
   url.searchParams.set('user-id', userId)
 
-  url.searchParams.set('reason', reason)
-  url.searchParams.set('evidence', evidenceLines.join('\n'))
+  url.searchParams.set(
+    'reason',
+    `AgentScan classified this account as possible "${result.classification}" (score ${result.score}/100).`,
+  )
+  url.searchParams.set('evidence', `- Flagged in: ${withoutBacklink(location.href)}`)
 
   return url.toString()
 }
