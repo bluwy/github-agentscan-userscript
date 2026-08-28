@@ -109,8 +109,8 @@ function getCacheTtl(identifyResult: IdentifyResult) {
     case 'automation':
       return 60 * 60 * 24 * 7 // 1 week
     case 'mixed':
-      return 60 * 60 * 24 * 3 // 3 days
+      return 60 * 60 * 24 * 4 // 4 days
     default:
-      return 60 * 60 * 24 // 1 day
+      return 60 * 60 * 24 * 2 // 2 days
   }
 }
