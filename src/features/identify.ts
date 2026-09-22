@@ -14,6 +14,7 @@ export function identify() {
       'a[class*="ActivityHeader-module__AuthorName"]',
       // PR list
       '.opened-by > a',
+      'a[class*="PullsListItem-module__filterLink"]',
       // Issue list
       'a[class*="IssueItem-module__authorCreatedLink"]',
       // Home page
