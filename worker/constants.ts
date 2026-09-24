@@ -22,4 +22,10 @@ export const knownBots = new Set([
   'heroku',
   'aws-amplify',
   'eslintbot',
+
+  // Additional by userscript
+  'ghost',
+  'rustbot',
+  'rust-rfcbot',
+  'BrewTestBot',
 ])
