@@ -22,16 +22,16 @@
     "typecheck": "tsc -b",
     "format": "oxfmt --write \"**/*.ts\""
   },
-  "packageManager": "pnpm@11.22.0",
+  "packageManager": "pnpm@12.6.0",
   "dependencies": {
     "flru": "^1.0.2"
   },
   "devDependencies": {
     "@bluwy/usb": "^0.2.0",
     "@types/greasemonkey": "^4.0.7",
-    "@types/node": "^26.2.0",
-    "oxfmt": "^0.64.0",
-    "typescript": "^7.0.2",
-    "wrangler": "^4.125.0"
+    "@types/node": "^26.6.2",
+    "oxfmt": "^0.70.0",
+    "typescript": "~7.0.2",
+    "wrangler": "^4.136.3"
   }
 }
