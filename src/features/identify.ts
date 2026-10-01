@@ -54,7 +54,6 @@ export function identify() {
     if (isAlreadyBot) continue
 
     const username = getUsername(authorEl)
-    console.log('Identified username:', username)
     if (!username) continue
 
     // May appear in some pages that don't show the label, like commits page

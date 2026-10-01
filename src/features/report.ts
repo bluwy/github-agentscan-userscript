@@ -9,19 +9,14 @@ export function report() {
 }
 
 function handlePR() {
-  const reportButtons = document.querySelectorAll<HTMLAnchorElement>(
-    [
-      // Normal comment
-      '.timeline-comment-header a[aria-label="Report abusive content"]',
-      // Review comment
-      '.timeline-comment-group a[aria-label="Report content"]',
-    ].join(', '),
+  const menus = document.querySelectorAll<HTMLAnchorElement>(
+    '.timeline-comment-actions details-menu.dropdown-menu',
   )
-  for (const button of reportButtons) {
-    if (analyzedEls.has(button)) continue
-    analyzedEls.add(button)
+  for (const menu of menus) {
+    if (analyzedEls.has(menu)) continue
+    analyzedEls.add(menu)
 
-    const header = button.closest('.timeline-comment-header, .timeline-comment-group')
+    const header = menu.closest('.timeline-comment-header, .timeline-comment-group')
     if (!header) continue
 
     const authorEl = header.querySelector<HTMLAnchorElement>('a.author')
@@ -36,15 +31,22 @@ function handlePR() {
       ?.match(/\/u\/(\d+)\?/)?.[1]
     if (!userId) continue
 
+    const insertAnchor =
+      menu.querySelector<HTMLElement>('a[aria-label="Report abusive content"]') ??
+      menu.querySelector<HTMLElement>('a[aria-label="Report content"]')
+
     // Add the report button
-    const reportButton = button.cloneNode() as HTMLAnchorElement
+    const reportButton = document.createElement('a')
+    reportButton.classList.add('dropdown-item', 'btn-link')
     reportButton.href = buildSimpleReportIssueUrl(username, userId)
     reportButton.target = '_blank'
     reportButton.textContent = 'Report to AgentScan'
     reportButton.setAttribute('aria-label', 'Report to AgentScan')
-    delete reportButton.dataset.gaClick
-    delete reportButton.dataset.testSelector
-    button.insertAdjacentElement('afterend', reportButton)
+    if (insertAnchor) {
+      insertAnchor.insertAdjacentElement('afterend', reportButton)
+    } else {
+      menu.appendChild(reportButton)
+    }
 
     // Update the report button href with a more complete link later as it may take a while,
     // and we want to show the report button first
