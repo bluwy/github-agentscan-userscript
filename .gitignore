@@ -2,3 +2,4 @@ node_modules
 dist
 .wrangler
 /worker/worker-configuration.d.ts
+.env

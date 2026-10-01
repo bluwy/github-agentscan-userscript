@@ -1,3 +1,4 @@
+import { analyze } from '@unveil/vk'
 import { knownBots } from '../constants.ts'
 import type { RouteHandler } from '../types.ts'
 import { userAgentHeader } from '../utils.ts'
@@ -11,6 +12,8 @@ interface IdentifyResult {
   confidence: number
   /** Manually flagged */
   isCommunityFlagged: boolean
+  /** Contributed to bounty repositories (field added since 2026-10-01) */
+  isBountyHunter: boolean
 }
 
 export const handler: RouteHandler = async (request, env, ctx) => {
@@ -25,7 +28,7 @@ export const handler: RouteHandler = async (request, env, ctx) => {
   // them further, so mark them as 400. The userscript shouldn't be fetching these in
   // the first place.
   if (knownBots.has(username.toLowerCase())) {
-    return new Response('Known bot', {
+    return new Response('Known bot or automation', {
       status: 400,
       headers: {
         'Content-Type': 'text/plain',
@@ -48,12 +51,31 @@ export const handler: RouteHandler = async (request, env, ctx) => {
     })
   }
 
-  const result = await fetch(`https://agentscan.tools/api/identify-replicant/${username}`, {
-    headers: userAgentHeader,
-  })
-  const data: any = await result.json()
+  let identifyResult: IdentifyResult
+  try {
+    const result = await analyze(username, { token: env.GITHUB_TOKEN })
 
-  if (result.status === 404) {
+    if (result.analysis.isGitHubApp) {
+      return new Response('Known bot or automation', {
+        status: 400,
+        headers: {
+          'Content-Type': 'text/plain',
+          'Cache-Control': 'public, max-age=86400', // Cache for 1 day
+          'Access-Control-Allow-Origin': '*',
+        },
+      })
+    }
+
+    identifyResult = {
+      score: result.analysis.score,
+      classification: result.analysis.classification,
+      confidence: result.analysis.confidence,
+      isCommunityFlagged: await isCommunityFlagged(username, env.GITHUB_TOKEN),
+      isBountyHunter: result.analysis.isBountyHunter,
+    }
+  } catch (e) {
+    console.log(`Error analyzing user ${username}:`, e)
+
     return new Response('User not found', {
       status: 404,
       headers: {
@@ -64,12 +86,6 @@ export const handler: RouteHandler = async (request, env, ctx) => {
     })
   }
 
-  const identifyResult: IdentifyResult = {
-    score: data.analysis.score,
-    classification: data.analysis.classification,
-    confidence: data.analysis.confidence,
-    isCommunityFlagged: await isCommunityFlagged(username),
-  }
   const cacheTtl = getCacheTtl(identifyResult)
   const identifyResultJson = JSON.stringify(identifyResult)
 
@@ -89,14 +105,23 @@ export const handler: RouteHandler = async (request, env, ctx) => {
   })
 }
 
-async function isCommunityFlagged(username: string) {
-  const response = await fetch('https://agentscan.tools/api/verified-automations', {
-    cf: {
-      // Cache this the same as the lowest ttl from `getCacheTtl`
-      cacheTtl: 60 * 60 * 24, // 1 day
-      cacheEverything: true,
+async function isCommunityFlagged(username: string, githubToken: string) {
+  const response = await fetch(
+    'https://api.github.com/repos/MatteoGabriele/agentscan/contents/data/verified-automations-list.json',
+    {
+      headers: {
+        ...userAgentHeader,
+        Accept: 'application/vnd.github.raw+json',
+        Authorization: `Bearer ${githubToken}`,
+        'X-GitHub-Api-Version': '2026-03-10',
+      },
+      cf: {
+        // Cache this the same as the lowest ttl from `getCacheTtl`
+        cacheTtl: 60 * 60 * 24 * 2, // 2 days
+        cacheEverything: true,
+      },
     },
-  })
+  )
   const data: { username: string }[] = await response.json()
   return data.some((item) => item.username === username)
 }
@@ -109,7 +134,7 @@ function getCacheTtl(identifyResult: IdentifyResult) {
     case 'automation':
       return 60 * 60 * 24 * 7 // 1 week
     case 'mixed':
-      return 60 * 60 * 24 * 4 // 4 days
+      return 60 * 60 * 24 * 3 // 3 days
     default:
       return 60 * 60 * 24 * 2 // 2 days
   }

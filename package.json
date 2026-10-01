@@ -24,6 +24,7 @@
   },
   "packageManager": "pnpm@12.8.2",
   "dependencies": {
+    "@unveil/vk": "^0.6.0",
     "flru": "^1.0.2"
   },
   "devDependencies": {
