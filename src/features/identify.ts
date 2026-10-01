@@ -82,43 +82,63 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
 
   const agentscanLink = `https://agentscan.tools/user/${username}`
 
-  let label: HTMLSpanElement | null = null
+  const labels: HTMLSpanElement[] = []
   if (identifyResult.isCommunityFlagged) {
-    label = createLabel(
-      'AI',
-      agentscanLink,
-      'Label--danger',
-      'This user has been flagged as AI by the community',
+    labels.push(
+      createLabel(
+        'AI',
+        agentscanLink,
+        'Label--danger',
+        'This user has been flagged as AI by the community',
+      ),
     )
   } else if (identifyResult.classification === 'automation') {
-    label = createLabel(
-      'AI',
-      agentscanLink,
-      'Label--severe',
-      `This user has been flagged as automation by AgentScan\n(confidence: ${identifyResult.confidence})`,
+    labels.push(
+      createLabel(
+        'AI',
+        agentscanLink,
+        'Label--severe',
+        `This user has been flagged as automation by AgentScan\n(confidence: ${identifyResult.confidence})`,
+      ),
     )
   } else if (identifyResult.classification === 'mixed') {
-    label = createLabel(
-      'Suspicious',
-      agentscanLink,
-      'Label--warning',
-      `This user has been flagged as mixed by AgentScan\n(score: ${identifyResult.score}, confidence: ${identifyResult.confidence})`,
+    labels.push(
+      createLabel(
+        'Suspicious',
+        agentscanLink,
+        'Label--warning',
+        `This user has been flagged as mixed by AgentScan\n(score: ${identifyResult.score}, confidence: ${identifyResult.confidence})`,
+      ),
     )
   } else if (false) {
     // For debugging
-    label = createLabel('Human', agentscanLink, 'Label--secondary', 'Living and breathing')
+    labels.push(createLabel('Human', agentscanLink, 'Label--secondary', 'Living and breathing'))
   }
 
-  if (label && authorEl.parentElement) {
+  if (identifyResult.isBountyHunter) {
+    labels.push(
+      createLabel(
+        'Bounty Hunter',
+        agentscanLink,
+        'Label--warning',
+        'This user has been flagged as a bounty hunter by AgentScan',
+      ),
+    )
+  }
+
+  if (labels.length > 0 && authorEl.parentElement) {
     const parentStyle = getComputedStyle(authorEl.parentElement)
     const alreadyHasMargin = parentStyle.display === 'flex' && parentStyle.gap.endsWith('px')
     if (!alreadyHasMargin) {
-      ;(label.childNodes[0] as HTMLElement).classList.add('ml-1')
+      for (const label of labels) {
+        ;(label.childNodes[0] as HTMLElement).classList.add('ml-1')
+      }
     }
   }
 
-  if (label) {
-    authorEl.insertAdjacentElement('afterend', label)
+  // Insert in reverse order to maintain the intended sequence of labels
+  for (let i = labels.length - 1; i >= 0; i--) {
+    authorEl.insertAdjacentElement('afterend', labels[i])
   }
 }
 
