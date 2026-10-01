@@ -35,29 +35,8 @@ export function identify() {
     const alreadyLabeled = parent.querySelector('[data-github-agentscan-userscript]')
     if (alreadyLabeled) continue
 
-    // Check adjacent label if is already a bot
-    const isAlreadyBot = Array.from(
-      parent.querySelectorAll(
-        [
-          // PR
-          'span.Label',
-          // Issue
-          'span[data-component="Label"]',
-          // PR list
-          'span.tooltipped > span.Label',
-        ].join(', '),
-      ),
-    ).find((label) => {
-      const text = label.textContent?.trim().toLowerCase()
-      return text === 'ai' || text === 'bot'
-    })
-    if (isAlreadyBot) continue
-
     const username = getUsername(authorEl)
     if (!username) continue
-
-    // May appear in some pages that don't show the label, like commits page
-    if (username.endsWith('[bot]')) continue
 
     identifyUsername(username, authorEl).catch((err) => {
       console.error('Error fetching identify result for user', username, err)

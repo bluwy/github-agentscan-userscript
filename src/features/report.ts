@@ -1,5 +1,6 @@
 import { getIdentifyResult } from '../identify-result.ts'
 import { getUsername } from '../utils-username.ts'
+import { waitUntilInView } from '../utils-wait.ts'
 
 const analyzedEls = new WeakSet<HTMLElement>()
 
@@ -50,7 +51,7 @@ function handlePR() {
 
     // Update the report button href with a more complete link later as it may take a while,
     // and we want to show the report button first
-    buildFullReportIssueUrl(username, userId)
+    buildFullReportIssueUrl(username, userId, authorEl)
       .then((url) => {
         if (!url) return
         // The element could have been removed if the fetch took too long and the user navigated away
@@ -76,7 +77,18 @@ function buildSimpleReportIssueUrl(username: string, userId: string): string {
 }
 
 // From agentscan-action
-async function buildFullReportIssueUrl(username: string, userId: string): Promise<string | null> {
+async function buildFullReportIssueUrl(
+  username: string,
+  userId: string,
+  authorEl: HTMLAnchorElement,
+): Promise<string | null> {
+  try {
+    await waitUntilInView(authorEl)
+  } catch {
+    // Element is no longer in view
+    return null
+  }
+
   const result = await getIdentifyResult(username)
   if (!result) return null
 
