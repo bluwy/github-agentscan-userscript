@@ -95,14 +95,14 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
       'AI',
       agentscanLink,
       'Label--severe',
-      'This user has been flagged as automation by AgentScan',
+      `This user has been flagged as automation by AgentScan\n(confidence: ${identifyResult.confidence})`,
     )
   } else if (identifyResult.classification === 'mixed') {
     label = createLabel(
-      'AI',
+      'Suspicious',
       agentscanLink,
       'Label--warning',
-      'This user has been flagged as mixed by AgentScan',
+      `This user has been flagged as mixed by AgentScan\n(score: ${identifyResult.score}, confidence: ${identifyResult.confidence})`,
     )
   } else if (false) {
     // For debugging

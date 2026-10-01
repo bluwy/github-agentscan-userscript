@@ -6,6 +6,8 @@ export interface IdentifyResult {
   classification: 'organic' | 'mixed' | 'automation' | 'insufficient-data'
   confidence: number
   isCommunityFlagged: boolean
+  // May not exist in old cache (field added since 2026-10-01)
+  isBountyHunter?: boolean
 }
 
 const cache = flru<IdentifyResult | null | Promise<IdentifyResult | null>>(30)
