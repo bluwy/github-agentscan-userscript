@@ -17,6 +17,7 @@ export function identify() {
       'a[class*="PullsListItem-module__filterLink"]',
       // Issue list
       'a[class*="IssueItem-module__authorCreatedLink"]',
+      'button[class*="IssueListItem-module__authorLink"]',
       // Home page
       'a.Link[data-hovercard-type="user"][data-octo-dimensions="link_type:self"]',
       // Commits page
@@ -53,6 +54,7 @@ export function identify() {
     if (isAlreadyBot) continue
 
     const username = getUsername(authorEl)
+    console.log('Identified username:', username)
     if (!username) continue
 
     // May appear in some pages that don't show the label, like commits page
