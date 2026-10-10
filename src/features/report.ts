@@ -5,7 +5,7 @@ import { waitUntilInView } from '../utils-wait.ts'
 const analyzedEls = new WeakSet<HTMLElement>()
 
 export function report() {
-  const menus = document.querySelectorAll<HTMLAnchorElement>(
+  const menus = document.querySelectorAll<HTMLElement>(
     [
       // PRs
       '.timeline-comment-actions details-menu.dropdown-menu',
@@ -14,18 +14,28 @@ export function report() {
       // It's too difficult to handle for issues right now, so skipping
     ].join(', '),
   )
-  for (const menu of menus) {
-    if (analyzedEls.has(menu)) continue
+  for (const menu of menus) handleMenu(menu)
+
+  async function handleMenu(menu: HTMLElement) {
+    if (analyzedEls.has(menu)) return
     analyzedEls.add(menu)
 
+    // Wait until the menu opens before continuing
+    try {
+      await waitUntilInView(menu)
+    } catch {
+      // Element is no longer in view
+      return
+    }
+
     const header = menu.closest('.timeline-comment-header, .timeline-comment-group')
-    if (!header) continue
+    if (!header) return
 
     const authorEl = header.querySelector<HTMLAnchorElement>('a.author')
-    if (!authorEl) continue
+    if (!authorEl) return
 
     const username = getUsername(authorEl)
-    if (!username) continue
+    if (!username) return
 
     const userId =
       header
@@ -39,7 +49,7 @@ export function report() {
         )
         ?.getAttribute('src')
         ?.match(/\/u\/(\d+)\?/)?.[1]
-    if (!userId) continue
+    if (!userId) return
 
     const insertAnchor =
       menu.querySelector<HTMLElement>('a[aria-label="Report abusive content"]') ??
