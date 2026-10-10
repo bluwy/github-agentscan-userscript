@@ -5,13 +5,14 @@ import { waitUntilInView } from '../utils-wait.ts'
 const analyzedEls = new WeakSet<HTMLElement>()
 
 export function report() {
-  handlePR()
-  // It's too difficult to handle for issues right now, so skipping
-}
-
-function handlePR() {
   const menus = document.querySelectorAll<HTMLAnchorElement>(
-    '.timeline-comment-actions details-menu.dropdown-menu',
+    [
+      // PRs
+      '.timeline-comment-actions details-menu.dropdown-menu',
+      // Advisories
+      '.timeline-comment-header details-menu.dropdown-menu',
+      // It's too difficult to handle for issues right now, so skipping
+    ].join(', '),
   )
   for (const menu of menus) {
     if (analyzedEls.has(menu)) continue
@@ -26,15 +27,24 @@ function handlePR() {
     const username = getUsername(authorEl)
     if (!username) continue
 
-    const userId = header
-      .querySelector('img[src^="https://avatars.githubusercontent.com/u/"]')
-      ?.getAttribute('src')
-      ?.match(/\/u\/(\d+)\?/)?.[1]
+    const userId =
+      header
+        .querySelector('img[src^="https://avatars.githubusercontent.com/u/"]')
+        ?.getAttribute('src')
+        ?.match(/\/u\/(\d+)\?/)?.[1] ??
+      // The advisory first comment may not have an avatar, so search it somewhere else
+      document
+        .querySelector(
+          `a[data-hovercard-url="/users/${username}/hovercard"] > img[src^="https://avatars.githubusercontent.com/u/"]`,
+        )
+        ?.getAttribute('src')
+        ?.match(/\/u\/(\d+)\?/)?.[1]
     if (!userId) continue
 
     const insertAnchor =
       menu.querySelector<HTMLElement>('a[aria-label="Report abusive content"]') ??
-      menu.querySelector<HTMLElement>('a[aria-label="Report content"]')
+      menu.querySelector<HTMLElement>('a[aria-label="Report content"]') ??
+      menu.querySelector<HTMLElement>('a[href^="/contact/report-content"]')
 
     // Add the report button
     const reportButton = document.createElement('a')
