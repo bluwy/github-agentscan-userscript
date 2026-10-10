@@ -1,6 +1,6 @@
-import { getIdentifyResult } from '../identify-result.ts'
+import { getIdentifyResult, type IdentifyResult } from '../identify-result.ts'
 import { getUsername } from '../utils-username.ts'
-import { waitUntilInView } from '../utils-wait.ts'
+import { waitUntilDisconnected, waitUntilInView } from '../utils-wait.ts'
 
 const analyzedEls = new WeakSet<HTMLElement>()
 
@@ -28,6 +28,12 @@ export function report() {
       return
     }
 
+    // Wait until finish loading too
+    const loadingSpinner = menu.querySelector<HTMLElement>('svg[aria-label="Loading..."]')
+    if (loadingSpinner) {
+      await waitUntilDisconnected(loadingSpinner)
+    }
+
     const header = menu.closest('.timeline-comment-header, .timeline-comment-group')
     if (!header) return
 
@@ -52,39 +58,51 @@ export function report() {
     if (!userId) return
 
     const insertAnchor =
-      menu.querySelector<HTMLElement>('a[aria-label="Report abusive content"]') ??
-      menu.querySelector<HTMLElement>('a[aria-label="Report content"]') ??
-      menu.querySelector<HTMLElement>('a[href^="/contact/report-content"]')
+      menu.querySelector('a[aria-label="Report abusive content"]') ??
+      menu.querySelector('a[aria-label="Report content"]') ??
+      menu.querySelector('a[href^="/contact/report-content"]')
 
-    // Add the report button
-    const reportButton = document.createElement('a')
-    reportButton.classList.add('dropdown-item', 'btn-link')
-    reportButton.href = buildSimpleReportIssueUrl(username, userId)
-    reportButton.target = '_blank'
-    reportButton.textContent = 'Report to AgentScan'
-    reportButton.setAttribute('aria-label', 'Report to AgentScan')
+    // Add the report buttons
+    const reportMisidButton = document.createElement('a')
+    reportMisidButton.classList.add('dropdown-item', 'btn-link')
+    reportMisidButton.href = buildSimpleReportMisidIssueUrl(username, userId)
+    reportMisidButton.target = '_blank'
+    reportMisidButton.textContent = 'Report misidentification'
+    reportMisidButton.setAttribute('aria-label', 'Report misidentification')
     if (insertAnchor) {
-      insertAnchor.insertAdjacentElement('afterend', reportButton)
+      insertAnchor.insertAdjacentElement('afterend', reportMisidButton)
     } else {
-      menu.appendChild(reportButton)
+      menu.appendChild(reportMisidButton)
+    }
+
+    const reportUserButton = document.createElement('a')
+    reportUserButton.classList.add('dropdown-item', 'btn-link')
+    reportUserButton.href = buildSimpleReportUserIssueUrl(username, userId)
+    reportUserButton.target = '_blank'
+    reportUserButton.textContent = 'Report to AgentScan'
+    reportUserButton.setAttribute('aria-label', 'Report to AgentScan')
+    if (insertAnchor) {
+      insertAnchor.insertAdjacentElement('afterend', reportUserButton)
+    } else {
+      menu.appendChild(reportUserButton)
     }
 
     // Update the report button href with a more complete link later as it may take a while,
     // and we want to show the report button first
-    buildFullReportIssueUrl(username, userId, authorEl)
-      .then((url) => {
-        if (!url) return
-        // The element could have been removed if the fetch took too long and the user navigated away
-        if (!reportButton.isConnected) return
-        reportButton.href = url
-      })
-      .catch((err) => {
-        console.error('Error building report issue URL for user', username, err)
-      })
+    const result = await getIdentifyResult(username)
+    if (!result) return
+
+    // The element could have been removed if the fetch took too long and the user navigated away
+    if (reportMisidButton.isConnected) {
+      reportMisidButton.href = buildFullReportMisidIssueUrl(username, userId, result)
+    }
+    if (reportUserButton.isConnected) {
+      reportUserButton.href = buildFullReportUserIssueUrl(username, userId, result)
+    }
   }
 }
 
-function buildSimpleReportIssueUrl(username: string, userId: string): string {
+function buildSimpleReportUserIssueUrl(username: string, userId: string): string {
   const url = new URL('https://github.com/matteogabriele/agentscan/issues/new')
   url.searchParams.set('template', 'report-automated-account.yml')
   url.searchParams.set('title', `[AUTOMATION] ${username}`)
@@ -97,21 +115,11 @@ function buildSimpleReportIssueUrl(username: string, userId: string): string {
 }
 
 // From agentscan-action
-async function buildFullReportIssueUrl(
+function buildFullReportUserIssueUrl(
   username: string,
   userId: string,
-  authorEl: HTMLAnchorElement,
-): Promise<string | null> {
-  try {
-    await waitUntilInView(authorEl)
-  } catch {
-    // Element is no longer in view
-    return null
-  }
-
-  const result = await getIdentifyResult(username)
-  if (!result) return null
-
+  result: IdentifyResult,
+): string {
   const url = new URL('https://github.com/matteogabriele/agentscan/issues/new')
   url.searchParams.set('template', 'report-automated-account.yml')
   url.searchParams.set('title', `[AUTOMATION] ${username}`)
@@ -123,6 +131,42 @@ async function buildFullReportIssueUrl(
     `AgentScan classified this account as possible "${result.classification}" (score ${result.score}/100).`,
   )
   url.searchParams.set('evidence', `- Flagged in: ${withoutBacklink(location.href)}`)
+
+  return url.toString()
+}
+
+function buildSimpleReportMisidIssueUrl(username: string, userId: string): string {
+  const url = new URL('https://github.com/unveil-project/identity/issues/new')
+  url.searchParams.set(
+    'body',
+    `\
+The user \`${username}\` (id: \`${userId}\`) is misidentified.
+
+- https://agentscan.tools/user/${username}
+- Flagged in: ${withoutBacklink(location.href)}
+
+_Explain why_`,
+  )
+
+  return url.toString()
+}
+
+function buildFullReportMisidIssueUrl(
+  username: string,
+  userId: string,
+  result: IdentifyResult,
+): string {
+  const url = new URL('https://github.com/unveil-project/identity/issues/new')
+  url.searchParams.set(
+    'body',
+    `\
+The user \`${username}\` (id: \`${userId}\`) is misidentified as "${result.classification}" (score ${result.score}/100).
+
+- https://agentscan.tools/user/${username}
+- Flagged in: ${withoutBacklink(location.href)}
+
+_Explain why_`,
+  )
 
   return url.toString()
 }

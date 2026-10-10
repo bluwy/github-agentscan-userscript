@@ -27,6 +27,9 @@ const inViewRemovalObserver = new MutationObserver(
 inViewRemovalObserver.observe(document, { childList: true, subtree: true })
 
 export function waitUntilInView(element: HTMLElement): Promise<void> {
+  const existing = inViewResolvers.get(element)
+  if (existing) return existing.promise
+
   const p = promiseWithResolvers<void>()
 
   if (!element.isConnected) {
@@ -37,6 +40,35 @@ export function waitUntilInView(element: HTMLElement): Promise<void> {
   inViewResolvers.set(element, p)
   inViewIntersectionObserver.observe(element)
 
+  return p.promise
+}
+
+const disconnectedResolvers = new Map<HTMLElement, PromiseWithResolvers<void>>()
+
+const disconnectedRemovalObserver = new MutationObserver(
+  debounce(() => {
+    for (const [element, resolvers] of disconnectedResolvers) {
+      if (element.isConnected) continue
+
+      disconnectedResolvers.delete(element)
+      resolvers.resolve()
+    }
+  }, 200),
+)
+disconnectedRemovalObserver.observe(document, { childList: true, subtree: true })
+
+export function waitUntilDisconnected(element: HTMLElement): Promise<void> {
+  const existing = disconnectedResolvers.get(element)
+  if (existing) return existing.promise
+
+  const p = promiseWithResolvers<void>()
+
+  if (!element.isConnected) {
+    p.resolve()
+    return p.promise
+  }
+
+  disconnectedResolvers.set(element, p)
   return p.promise
 }
 
