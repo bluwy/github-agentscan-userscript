@@ -7,6 +7,8 @@ Show AgentScan info for GitHub users. [Install on Greasyfork](https://greasyfork
 
 <img height="300" alt="example" src="https://github.com/user-attachments/assets/50fb121e-31ea-4df5-bdc3-3d1617f1ca51" />
 
+For the full changelog, see the [Greasyfork history page](https://greasyfork.org/en/scripts/592445-github-agentscan/versions).
+
 ## Sponsors
 
 <p align="center">
