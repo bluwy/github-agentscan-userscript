@@ -22,7 +22,7 @@
     "typecheck": "tsc -b",
     "format": "oxfmt --write \"**/*.ts\""
   },
-  "packageManager": "pnpm@12.8.2",
+  "packageManager": "pnpm@12.10.1",
   "dependencies": {
     "@unveil/vk": "^0.6.0",
     "flru": "^1.0.2"
@@ -30,9 +30,9 @@
   "devDependencies": {
     "@bluwy/usb": "^0.2.0",
     "@types/greasemonkey": "^4.0.7",
-    "@types/node": "^26.6.3",
-    "oxfmt": "^0.71.0",
+    "@types/node": "^26.6.4",
+    "oxfmt": "^0.72.0",
     "typescript": "~7.0.2",
-    "wrangler": "^4.144.0"
+    "wrangler": "^4.149.0"
   }
 }
