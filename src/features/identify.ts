@@ -23,6 +23,9 @@ export function identify() {
       // Commits page
       'li[class*="listItem__"] a[class*="authorHoverableLink"]',
       'li[class*="listItem__"] a[class*="authorNameLink"]',
+      // Commits on readme page
+      'a[class*="_authorHoverableLink"]',
+      'a[class*="_authorNameLink"]',
     ].join(', '),
   )
   for (const authorEl of authorEls) {
