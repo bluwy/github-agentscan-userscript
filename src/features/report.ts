@@ -63,16 +63,16 @@ export function report() {
       menu.querySelector('a[href^="/contact/report-content"]')
 
     // Add the report buttons
-    const reportMisidButton = document.createElement('a')
-    reportMisidButton.classList.add('dropdown-item', 'btn-link')
-    reportMisidButton.href = buildSimpleReportMisidIssueUrl(username, userId)
-    reportMisidButton.target = '_blank'
-    reportMisidButton.textContent = 'Report misidentification'
-    reportMisidButton.setAttribute('aria-label', 'Report misidentification')
+    const reportMisclassButton = document.createElement('a')
+    reportMisclassButton.classList.add('dropdown-item', 'btn-link')
+    reportMisclassButton.href = buildSimpleReportMisclassIssueUrl(username, userId)
+    reportMisclassButton.target = '_blank'
+    reportMisclassButton.textContent = 'Report misclassification'
+    reportMisclassButton.setAttribute('aria-label', 'Report misclassification')
     if (insertAnchor) {
-      insertAnchor.insertAdjacentElement('afterend', reportMisidButton)
+      insertAnchor.insertAdjacentElement('afterend', reportMisclassButton)
     } else {
-      menu.appendChild(reportMisidButton)
+      menu.appendChild(reportMisclassButton)
     }
 
     const reportUserButton = document.createElement('a')
@@ -93,8 +93,8 @@ export function report() {
     if (!result) return
 
     // The element could have been removed if the fetch took too long and the user navigated away
-    if (reportMisidButton.isConnected) {
-      reportMisidButton.href = buildFullReportMisidIssueUrl(username, userId, result)
+    if (reportMisclassButton.isConnected) {
+      reportMisclassButton.href = buildFullReportMisclassIssueUrl(username, userId, result)
     }
     if (reportUserButton.isConnected) {
       reportUserButton.href = buildFullReportUserIssueUrl(username, userId, result)
@@ -135,12 +135,12 @@ function buildFullReportUserIssueUrl(
   return url.toString()
 }
 
-function buildSimpleReportMisidIssueUrl(username: string, userId: string): string {
+function buildSimpleReportMisclassIssueUrl(username: string, userId: string): string {
   const url = new URL('https://github.com/unveil-project/identity/issues/new')
   url.searchParams.set(
     'body',
     `\
-The user \`${username}\` (id: \`${userId}\`) is misidentified.
+The user \`${username}\` (id: \`${userId}\`) is misclassified.
 
 - https://agentscan.tools/user/${username}
 - Flagged in: ${withoutBacklink(location.href)}
@@ -151,7 +151,7 @@ _Explain why_`,
   return url.toString()
 }
 
-function buildFullReportMisidIssueUrl(
+function buildFullReportMisclassIssueUrl(
   username: string,
   userId: string,
   result: IdentifyResult,
@@ -160,7 +160,7 @@ function buildFullReportMisidIssueUrl(
   url.searchParams.set(
     'body',
     `\
-The user \`${username}\` (id: \`${userId}\`) is misidentified as "${result.classification}" (score ${result.score}/100).
+The user \`${username}\` (id: \`${userId}\`) is misclassified as "${result.classification}" (score ${result.score}/100).
 
 - https://agentscan.tools/user/${username}
 - Flagged in: ${withoutBacklink(location.href)}
