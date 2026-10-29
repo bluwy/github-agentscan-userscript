@@ -10,19 +10,19 @@ export function identify() {
       // PR
       'a.author',
       // Issue
-      'a[class*="IssueBodyHeaderAuthor"]',
-      'a[class*="ActivityHeader-module__AuthorName"]',
+      'a[class*="authorLoginLink__"]',
+      'a[class*="eventActorLink__"]',
+      'a[class*="assigneeLink__"]',
+      'a[class*="AuthorName__"]',
       // PR list
-      '.opened-by > a',
-      'a[class*="PullsListItem-module__filterLink"]',
+      'li[class*="listItem__"] a[data-testid="author-filter-link"]',
       // Issue list
-      'a[class*="IssueItem-module__authorCreatedLink"]',
-      'button[class*="IssueListItem-module__authorLink"]',
+      'li[class*="listItem__"] button[data-testid="author-filter-link"]',
       // Home page
       'a.Link[data-hovercard-type="user"][data-octo-dimensions="link_type:self"]',
       // Commits page
-      'a[class*="AuthorAvatar-module__authorHoverableLink"]',
-      'a[class*="AuthorLink-module__authorNameLink"]',
+      'li[class*="listItem__"] a[class*="authorHoverableLink"]',
+      'li[class*="listItem__"] a[class*="authorNameLink"]',
     ].join(', '),
   )
   for (const authorEl of authorEls) {
@@ -104,14 +104,8 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
     )
   }
 
-  if (labels.length > 0 && authorEl.parentElement) {
-    const parentStyle = getComputedStyle(authorEl.parentElement)
-    const alreadyHasMargin = parentStyle.display === 'flex' && parentStyle.gap.endsWith('px')
-    if (!alreadyHasMargin) {
-      for (const label of labels) {
-        ;(label.childNodes[0] as HTMLElement).classList.add('ml-1')
-      }
-    }
+  if (labels.length > 0) {
+    handleLabelStyles(labels, authorEl)
   }
 
   // Insert in reverse order to maintain the intended sequence of labels
@@ -138,4 +132,28 @@ function createLabel(
   child.target = '_blank'
   label.appendChild(child)
   return label
+}
+
+function handleLabelStyles(labels: HTMLSpanElement[], authorEl: HTMLElement) {
+  const authorStyle = getComputedStyle(authorEl)
+  const authorUsesMarginRight =
+    authorStyle.marginRight.endsWith('px') && authorStyle.marginRight !== '0px'
+  if (authorUsesMarginRight) {
+    for (const label of labels) {
+      ;(label.childNodes[0] as HTMLElement).classList.add('mr-1')
+    }
+    return
+  }
+
+  if (authorEl.parentElement === null) return
+  const parentStyle = getComputedStyle(authorEl.parentElement)
+  const alreadyHasMargin =
+    parentStyle.display.endsWith('flex') &&
+    parentStyle.gap.endsWith('px') &&
+    parentStyle.gap !== '0px'
+  if (!alreadyHasMargin) {
+    for (const label of labels) {
+      ;(label.childNodes[0] as HTMLElement).classList.add('ml-1')
+    }
+  }
 }
