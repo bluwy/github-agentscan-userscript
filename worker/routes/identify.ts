@@ -55,7 +55,7 @@ export const handler: RouteHandler = async (request, env, ctx) => {
   try {
     const result = await analyze(username, { token: env.GITHUB_TOKEN })
 
-    if (result.analysis.isGitHubApp) {
+    if (result.report.isGitHubApp) {
       return new Response('Known bot or automation', {
         status: 400,
         headers: {
@@ -67,11 +67,11 @@ export const handler: RouteHandler = async (request, env, ctx) => {
     }
 
     identifyResult = {
-      score: result.analysis.score,
-      classification: result.analysis.classification,
-      confidence: result.analysis.confidence,
+      score: result.report.score,
+      classification: result.report.classification,
+      confidence: result.report.confidence,
       isCommunityFlagged: await isCommunityFlagged(username, env.GITHUB_TOKEN),
-      isBountyHunter: result.analysis.isBountyHunter,
+      isBountyHunter: result.report.isBountyHunter,
     }
   } catch (e) {
     console.log(`Error analyzing user ${username}:`, e)
