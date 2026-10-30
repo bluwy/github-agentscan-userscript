@@ -108,12 +108,8 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
   }
 
   if (labels.length > 0) {
-    handleLabelStyles(labels, authorEl)
-  }
-
-  // Insert in reverse order to maintain the intended sequence of labels
-  for (let i = labels.length - 1; i >= 0; i--) {
-    authorEl.insertAdjacentElement('afterend', labels[i])
+    const insertLabels = getInsertLabelsFn(authorEl)
+    insertLabels(labels)
   }
 }
 
@@ -157,6 +153,51 @@ function handleLabelStyles(labels: HTMLSpanElement[], authorEl: HTMLElement) {
   if (!alreadyHasMargin) {
     for (const label of labels) {
       ;(label.childNodes[0] as HTMLElement).classList.add('ml-1')
+    }
+  }
+}
+
+type InsertLabelsFn = (labels: HTMLElement[]) => void
+
+function getInsertLabelsFn(authorEl: HTMLElement): InsertLabelsFn {
+  // NOTE: While the commented out code tries to insert labels in existing places,
+  // in makes the overall UI injection behavior (labels by the author name) less consistent,
+  // so for now we don't do that and ponder for later.
+
+  // In PRs, comment blocks have existing labels added beside the triple-dot menu
+  // const commentBlock = authorEl.closest('.js-comment')
+  // if (commentBlock) {
+  //   const timelineActions = commentBlock.querySelector('.timeline-comment-actions')
+  //   const nextDiv = timelineActions?.nextElementSibling
+  //   if (nextDiv) {
+  //     return (labels) => {
+  //       // Insert in reverse order to maintain the intended sequence of labels
+  //       for (let i = labels.length - 1; i >= 0; i--) {
+  //         nextDiv.prepend(labels[i])
+  //       }
+  //     }
+  //   }
+  // }
+
+  // In PR list, existing labels are added beside the timestamp
+  // const listItemContainer = authorEl.closest('[class*="container__"]')
+  // if (listItemContainer) {
+  //   const metadataGroup = listItemContainer.querySelector('[class*="metadataGroup__"]')
+  //   if (metadataGroup) {
+  //     return (labels) => {
+  //       for (let i = labels.length - 1; i >= 0; i--) {
+  //         metadataGroup.prepend(labels[i])
+  //       }
+  //     }
+  //   }
+  // }
+
+  return (labels) => {
+    handleLabelStyles(labels, authorEl)
+
+    // Insert in reverse order to maintain the intended sequence of labels
+    for (let i = labels.length - 1; i >= 0; i--) {
+      authorEl.insertAdjacentElement('afterend', labels[i])
     }
   }
 }
