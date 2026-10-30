@@ -1,5 +1,5 @@
 // https://github.com/MatteoGabriele/agentscan-action/blob/main/src/known-bots.ts
-export const knownBots = new Set([
+const knownBots = new Set([
   'agentscanapp',
   'copilot',
   'dependabot',
@@ -28,4 +28,11 @@ export const knownBots = new Set([
   'rustbot',
   'rust-rfcbot',
   'BrewTestBot',
+  'babel-bot',
+  'typescript-bot',
 ])
+
+export function isKnownBot(username: string): boolean {
+  username = username.toLowerCase()
+  return username.endsWith('[bot]') || knownBots.has(username)
+}

@@ -1,7 +1,7 @@
 import { analyze } from '@unveil/vk'
-import { knownBots } from '../constants.ts'
 import type { RouteHandler } from '../types.ts'
-import { userAgentHeader } from '../utils.ts'
+import { isKnownBot } from '../utils-bot.ts'
+import { userAgentHeader } from '../utils-fetch.ts'
 
 interface IdentifyResult {
   /** 0 - 100 */
@@ -27,7 +27,7 @@ export const handler: RouteHandler = async (request, env, ctx) => {
   // Known bots should already have a "bot" label, and there's no point in analyzing
   // them further, so mark them as 400. The userscript shouldn't be fetching these in
   // the first place.
-  if (knownBots.has(username.toLowerCase())) {
+  if (isKnownBot(username)) {
     return new Response('Known bot or automation', {
       status: 400,
       headers: {
