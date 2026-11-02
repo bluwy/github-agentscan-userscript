@@ -1,3 +1,4 @@
+import { analyzeComment } from './features/analyze-comment.ts'
 import { identify } from './features/identify.ts'
 import { report } from './features/report.ts'
 import { debounce } from './utils-debounce.ts'
@@ -10,6 +11,7 @@ declare global {
 const run = debounce(() => {
   identify()
   report()
+  analyzeComment()
 }, 200)
 
 // listen to github page loaded event

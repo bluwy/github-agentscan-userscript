@@ -18,7 +18,7 @@ export function getUsername(authorEl: HTMLAnchorElement): string | undefined {
   if (fromText && /^[a-zA-Z0-9-]+$/.test(fromText) && !fromText.endsWith('[bot]')) return fromText
 }
 
-function isAlreadyBotOrAI(authorEl: HTMLAnchorElement): boolean {
+export function isAlreadyBotOrAI(authorEl: HTMLAnchorElement): boolean {
   const parent = authorEl.parentElement
   if (!parent) return false
 

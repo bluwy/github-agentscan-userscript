@@ -24,13 +24,17 @@
   },
   "packageManager": "pnpm@12.16.1",
   "dependencies": {
+    "@unveil/interlinked": "^0.0.12",
     "@unveil/vk": "^1.0.0",
-    "flru": "^1.0.2"
+    "flru": "^1.0.2",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2"
   },
   "devDependencies": {
     "@bluwy/usb": "^0.2.0",
     "@types/greasemonkey": "^4.0.7",
     "@types/node": "^26.6.5",
+    "@types/turndown": "^5.0.6",
     "oxfmt": "^0.75.0",
     "typescript": "~7.0.2",
     "wrangler": "^4.154.0"
