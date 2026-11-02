@@ -70,7 +70,7 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
         'AI',
         agentscanLink,
         'Label--danger',
-        'This user has been flagged as AI by the community',
+        'This user has been flagged as AI by the community.',
       ),
     )
   } else if (identifyResult.classification === 'automation') {
@@ -79,7 +79,7 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
         'AI',
         agentscanLink,
         'Label--severe',
-        `This user has been flagged as automation by AgentScan\n(confidence: ${identifyResult.confidence})`,
+        `This user has been flagged as automation by AgentScan.\n(confidence: ${identifyResult.confidence})`,
       ),
     )
   } else if (identifyResult.classification === 'mixed') {
@@ -88,12 +88,12 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
         'Suspicious',
         agentscanLink,
         'Label--warning',
-        `This user has been flagged as mixed by AgentScan\n(score: ${identifyResult.score}, confidence: ${identifyResult.confidence})`,
+        `This user has been flagged as mixed by AgentScan.\n(score: ${identifyResult.score}, confidence: ${identifyResult.confidence})`,
       ),
     )
   } else if (false) {
     // For debugging
-    labels.push(createLabel('Human', agentscanLink, 'Label--secondary', 'Living and breathing'))
+    labels.push(createLabel('Human', agentscanLink, 'Label--secondary', 'Living and breathing.'))
   }
 
   if (identifyResult.isBountyHunter) {
@@ -102,7 +102,7 @@ async function identifyUsername(username: string, authorEl: HTMLAnchorElement) {
         'Bounty Hunter',
         agentscanLink,
         'Label--warning',
-        'This user has been flagged as a bounty hunter by AgentScan',
+        'This user has been flagged as a bounty hunter by AgentScan.',
       ),
     )
   }

@@ -116,7 +116,7 @@ async function analyzeCommentBlock(block: HTMLElement) {
     label = createLabel(
       'Writes like AI',
       'Label--attention',
-      `This comment is flagged as automation by AgentScan Text\n` +
+      `This comment is flagged as automation by AgentScan Text.\n` +
         `(score: ${result.score}, confidence: ${result.confidence}, signals: ${result.signals.length})`,
     )
   } else if (false) {
@@ -124,7 +124,7 @@ async function analyzeCommentBlock(block: HTMLElement) {
     label = createLabel(
       'Writes like human',
       'Label--secondary',
-      `Very nice (score: ${result.score}, confidence: ${result.confidence}, signals: ${result.signals.length})`,
+      `Very nice. (score: ${result.score}, confidence: ${result.confidence}, signals: ${result.signals.length})`,
     )
   }
 
