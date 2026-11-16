@@ -30,6 +30,7 @@ const knownBots = new Set([
   'BrewTestBot',
   'babel-bot',
   'typescript-bot',
+  'nodejs-github-bot',
 ])
 
 export function isKnownBot(username: string): boolean {

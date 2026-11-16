@@ -1,3 +1,6 @@
 allowBuilds:
   esbuild: true
   workerd: true
+
+minimumReleaseAgeExclude:
+  - '@unveil/*'
